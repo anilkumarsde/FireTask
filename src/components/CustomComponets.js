@@ -10,6 +10,7 @@ import {
 import React from 'react';
 import {colors} from '../utils/colors';
 import {fonts} from '../utils/fonts';
+import InputComponet from './InputComponet';
 
 const {height, width} = Dimensions.get('window');
 
@@ -38,11 +39,14 @@ const CustomComponets = ({
       <View style={styles.accountWrapper}>
         <Text style={styles.labelTxt}>{lable}</Text>
         <Text style={styles.labelDesc}>{info}</Text>
-        <TextInput
+        <InputComponet email={'Enter your email'} />
+        <InputComponet email={'Enter your email'} />
+        {/* <TextInput
           placeholder={email}
           style={styles.emailBox}
           placeholderTextColor={colors.Grey}
-        />
+          value=""
+        /> */}
         <TextInput
           placeholder={password}
           secureTextEntry={true}
@@ -138,6 +142,7 @@ const styles = StyleSheet.create({
     color: 'rgba(0,0,0,0.5)',
     marginBottom: height * 0.005,
     width: '98%',
+    // fontFamily:fonts.MontserratMedium,
     lineHeight: 15,
     letterSpacing: 1.3,
   },
