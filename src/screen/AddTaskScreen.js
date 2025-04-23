@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {colors} from '../utils/colors';
 import StatusbarComponent from '../components/StatusbarComponent';
 import HeaderComponent from '../components/HeaderComponent';
@@ -17,12 +17,12 @@ import {fonts} from '../utils/fonts';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {Dropdown} from 'react-native-element-dropdown';
 import Addinput from '../components/Addinput';
-import {getApp} from '@react-native-firebase/app';
 import firestore from '@react-native-firebase/firestore';
 
 const {height, width} = Dimensions.get('window');
 
-const AddTaskScreen = ({navigation}) => {
+const AddTaskScreen = ({route,navigation}) => {
+  const { id, task: existingTask, infor: existingInfor } = route.params || {};
   const [value, setValue] = useState(null);
   const [task, setTask] = useState('');
   const [infor, setInfor] = useState('');
@@ -50,30 +50,49 @@ const AddTaskScreen = ({navigation}) => {
     {label: 'Others', value: 'others'},
   ];
 
+  useEffect(() => {
+    if (id) {
+      // Prefill if editing
+      setTask(existingTask || '');
+      setInfor(existingInfor || '');
+    }
+  }, [id, existingTask, existingInfor]);
+
   const AddItemHandler = async (task, infor) => {
       if(task.trim()==''|| infor.trim()==''){
         Alert.alert('plase fill all field')
         return ;
       }
-      const now = new Date();
-      const currentTime = now.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
       try {
-        await firestore().collection('todos').add({
-          task: task,
-          infor: infor,
-          time: currentTime,
-        });
+        if (id) {
+          // edit item
+          await firestore().collection('todos').doc(id).update({
+            task,
+            infor,
+          });
+          console.log('Task updated');
+        } else {
+          // add new item
+          const now = new Date();
+          const currentTime = now.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+
+          await firestore().collection('todos').add({
+            task,
+            infor,
+            time: currentTime,
+          });
+          console.log('Task added');
+        }
+
         setTask('');
         setInfor('');
-        console.log('data has been added');
-        navigation.goBack(' Todo');
+        navigation.goBack();
       } catch (error) {
-        console.log('something wrong', error);
+        console.log('Something went wrong:', error);
       }
-
 
   };
 
@@ -147,7 +166,7 @@ const AddTaskScreen = ({navigation}) => {
       <TouchableOpacity
         style={styles.addItemBtn}
         onPress={() => AddItemHandler(task, infor)}>
-        <Text style={styles.addBtnTxt}>ADD YOUR THINGS</Text>
+        <Text style={styles.addBtnTxt}>{id?'EDIT TASK':'ADD YOUR THINGS'}</Text>
       </TouchableOpacity>
     </View>
   );

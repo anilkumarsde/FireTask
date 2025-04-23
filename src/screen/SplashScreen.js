@@ -5,6 +5,7 @@ import {fonts} from '../utils/fonts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import StatusbarComponent from '../components/StatusbarComponent';
+import auth from '@react-native-firebase/auth';
 
 const {height, width} = Dimensions.get('window');
 
@@ -13,13 +14,17 @@ const SplashScreen = () => {
   useEffect(() => {
     const checkFirstTime = async () => {
       const isFirstTime = await AsyncStorage.getItem('alreadyLaunched');
-      console.log(isFirstTime, 'dfjsjdjd');
+      const currentUser = auth().currentUser;
       setTimeout(() => {
         if (isFirstTime === null) {
           AsyncStorage.setItem('alreadyLaunched', 'true');
           navigation.replace('SignUp');
         } else {
-          navigation.replace('Todo');
+          if (currentUser) {
+            navigation.replace('Todo');
+          } else {
+            navigation.replace('Signin');
+          }
         }
       }, 5000);
     };

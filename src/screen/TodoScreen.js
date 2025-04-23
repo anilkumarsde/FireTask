@@ -16,6 +16,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {fonts} from '../utils/fonts';
 import dayjs from 'dayjs';
 import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {height, width} = Dimensions.get('window');
 
@@ -64,6 +66,23 @@ const TodoScreen = ({navigation}) => {
     navigation.navigate('AddTask');
   };
 
+  // go for edit task handler
+  const goForEdit = (id, task, infor) => {
+    navigation.navigate('AddTask', {id, task, infor});
+  };
+
+  // signout use handler
+  const signountUser = async () => {
+    try {
+      await auth().signOut();
+      await AsyncStorage.removeItem('AlredyLounched');
+      navigation.navigate('Signin');
+      console.log('user sinout successfuly');
+    } catch (error) {
+      console.log('something went wrong',error);
+    }
+  };
+
   const renderItem = ({item}) => {
     let itemAddedTime = 'No time';
 
@@ -88,10 +107,12 @@ const TodoScreen = ({navigation}) => {
               color={colors.iconColor}
             />
           </TouchableOpacity>
-          <View style={styles.TodomessageWrapper}>
+          <TouchableOpacity
+            style={styles.TodomessageWrapper}
+            onPress={() => goForEdit(item.id, item.task, item.infor)}>
             <Text style={styles.titletxt}>{item.task}</Text>
             <Text style={styles.subTitleTxt}>{item.infor}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
         <View style={styles.rightListBox}>
           <Text style={styles.timeTxt}>{itemAddedTime}</Text>
@@ -106,7 +127,7 @@ const TodoScreen = ({navigation}) => {
         barStyle={'light-content'}
         backgroundColor={'#25b6f5'}
       />
-      // backgranound Image
+      {/* // backgranound Image */}
       <ImageBackground
         style={styles.imageBackground}
         source={require('../utils/images/mountain.jpg')}
@@ -114,7 +135,12 @@ const TodoScreen = ({navigation}) => {
         <View style={styles.headerContainer}>
           {/* Left side: */}
           <View style={styles.leftboxWrapper}>
-            <Feather name="menu" size={20} color={colors.White} />
+            <Feather
+              name="menu"
+              size={20}
+              color={colors.White}
+              onPress={signountUser}
+            />
             <Text style={styles.leftTitletxt}>Your Things</Text>
           </View>
 
@@ -134,6 +160,7 @@ const TodoScreen = ({navigation}) => {
             data={todo}
             keyExtractor={item => item.id}
             renderItem={renderItem}
+            showsVerticalScrollIndicator={false}
           />
         </View>
 
